@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin() {
+      return isSignedIn() && myRole() == "admin";
+    }
+    function isCollector() {
+      return isSignedIn() && myRole() == "collector";
+    }
+    function myCollectorRef() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.collectorRef;
+    }
+    function myCustomerRef() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.customerRef;
+    }
+
+    // users: a person can read their own profile; admin can read all.
+    // Created only at signup (client sets it once), never edited by clients after.
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if false;
+    }
+
+    // collectors: admin manages; a collector can read their own record;
+    // a newly-signed-up account may claim an unclaimed (uid == null) invite.
+    match /collectors/{id} {
+      allow read: if isAdmin() || (isCollector() && myCollectorRef() == id);
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.uid == null &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(["uid"]));
+      allow delete: if isAdmin();
+    }
+
+    // customers: admin manages all; a collector can read customers on their route;
+    // a customer can read/claim their own record.
+    match /customers/{id} {
+      allow read: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        (isSignedIn() && myCustomerRef() == id);
+      allow create: if isAdmin() || isSignedIn();
+      allow update: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        (isSignedIn() && resource.data.uid == null &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(["uid"]));
+      allow delete: if isAdmin();
+    }
+
+    // collections (daily deposits): admin sees all; collector sees/creates their own;
+    // customer reads entries that are theirs.
+    match /collections/{id} {
+      allow read: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        (isSignedIn() && resource.data.customerId == myCustomerRef());
+      allow create: if isAdmin() ||
+        (isCollector() && request.resource.data.collectorId == myCollectorRef());
+      allow update, delete: if isAdmin();
+    }
+
+    // withdrawals: customer creates their own request and reads their own history;
+    // admin reads/approves all.
+    match /withdrawals/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.customerId == myCustomerRef());
+      allow create: if isSignedIn() && request.resource.data.customerId == myCustomerRef();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+  }
+}

@@ -1,0 +1,241 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+:root {
+  --cover: #0F2E24;
+  --cover-dark: #0A2019;
+  --paper: #F4EFE2;
+  --paper-line: #DCD3B8;
+  --ink: #1C1A15;
+  --ink-soft: #5B5646;
+  --gold: #C9A227;
+  --gold-deep: #9A7B1A;
+  --stamp-red: #8B3A3A;
+  --deposit-green: #2F5233;
+  --radius: 4px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--cover);
+  background-image:
+    radial-gradient(ellipse at top left, rgba(255,255,255,0.04), transparent 60%),
+    radial-gradient(ellipse at bottom right, rgba(0,0,0,0.25), transparent 60%);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+h1, h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+h1 { font-size: 1.7rem; color: var(--ink); }
+h2 { font-size: 1.15rem; margin-top: 28px; color: var(--ink); }
+
+.sub { color: var(--ink-soft); margin: 0 0 18px; font-size: 0.92rem; }
+
+/* ---------- Auth screens ---------- */
+
+#view { min-height: 100vh; display: flex; }
+
+.auth-card {
+  margin: auto;
+  width: min(380px, 92vw);
+  background: var(--paper);
+  border-radius: var(--radius);
+  padding: 36px 30px 30px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  border-top: 4px solid var(--gold);
+}
+
+.ledger-mark {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--cover);
+  margin-bottom: 18px;
+}
+.ledger-mark.small { font-size: 1rem; color: var(--paper); }
+
+.auth-card h1 { font-size: 1.5rem; }
+
+.auth-card form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+.auth-card label { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--ink-soft); }
+
+input, select {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+}
+input:focus, select:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+.btn-primary {
+  background: var(--cover);
+  color: var(--paper);
+  border: none;
+  padding: 11px 18px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.btn-primary:hover { background: var(--cover-dark); }
+
+.btn-small { padding: 7px 12px; font-size: 0.82rem; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(244,239,226,0.35);
+  color: var(--paper);
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-ghost:hover { background: rgba(244,239,226,0.1); }
+
+.switch { margin-top: 16px; font-size: 0.85rem; color: var(--ink-soft); }
+.switch a { color: var(--gold-deep); font-weight: 600; text-decoration: none; }
+
+.error { color: var(--stamp-red); font-size: 0.85rem; min-height: 1.1em; margin-top: 10px; }
+
+/* ---------- Top bar ---------- */
+
+#topbar { background: var(--cover); }
+.topbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 920px; margin: 0 auto; padding: 14px 20px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.role-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.04em;
+  color: var(--cover);
+  background: var(--gold);
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* ---------- Dashboard shell ---------- */
+
+.dash { max-width: 920px; margin: 0 auto; padding: 28px 20px 60px; }
+
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 18px 0 26px; }
+.stat {
+  background: var(--paper);
+  border: 1px solid var(--paper-line);
+  border-top: 3px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-num { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 600; }
+.stat-label { font-size: 0.78rem; color: var(--ink-soft); }
+
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid rgba(244,239,226,0.25); margin-bottom: 18px; flex-wrap: wrap; }
+.tab-btn {
+  background: none; border: none; color: rgba(244,239,226,0.6);
+  padding: 9px 4px; font-size: 0.92rem; cursor: pointer;
+  border-bottom: 2px solid transparent; font-family: 'Inter', sans-serif;
+  margin-right: 14px;
+}
+.tab-btn.active { color: var(--paper); border-bottom-color: var(--gold); font-weight: 600; }
+
+.inline-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; background: var(--paper); padding: 14px; border-radius: var(--radius); border: 1px solid var(--paper-line); }
+.inline-form input, .inline-form select { flex: 1 1 160px; }
+.inline-form.stacked { flex-direction: column; align-items: stretch; }
+.inline-form.stacked label { display: flex; flex-direction: column; gap: 5px; font-size: 0.85rem; color: var(--ink-soft); }
+
+.hint { font-size: 0.78rem; color: rgba(244,239,226,0.55); margin: -2px 0 18px; }
+
+/* ---------- Ledger table ---------- */
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--paper);
+  border-radius: var(--radius);
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+.ledger-table th {
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--gold);
+}
+.ledger-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--paper-line);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.86rem;
+}
+.ledger-table td:first-child, .ledger-table th:first-child { font-family: 'Inter', sans-serif; }
+.ledger-table tr:last-child td { border-bottom: none; }
+
+.status { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; text-transform: capitalize; }
+.status-pending { background: rgba(201,162,39,0.2); color: var(--gold-deep); }
+.status-approved { background: rgba(47,82,51,0.15); color: var(--deposit-green); }
+.status-rejected { background: rgba(139,58,58,0.15); color: var(--stamp-red); }
+
+.approve { background: var(--deposit-green); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; margin-right: 6px; }
+.reject { background: var(--stamp-red); color: #fff; border: none; border-radius: var(--radius); cursor: pointer; }
+
+/* ---------- Collector ---------- */
+
+.collect-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--paper); border: 1px solid var(--paper-line);
+  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px;
+}
+.collect-info { display: flex; flex-direction: column; flex: 1; }
+.collect-info span { font-size: 0.78rem; color: var(--ink-soft); font-family: 'IBM Plex Mono', monospace; }
+.collect-row input { width: 110px; }
+
+.empty { color: rgba(244,239,226,0.6); font-size: 0.9rem; }
+
+/* ---------- Customer balance card ---------- */
+
+.balance-card {
+  background: linear-gradient(135deg, var(--cover) 0%, var(--cover-dark) 100%);
+  border-radius: var(--radius);
+  border-top: 4px solid var(--gold);
+  padding: 26px 24px;
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 24px;
+  color: var(--paper);
+}
+.balance-label { font-size: 0.8rem; color: rgba(244,239,226,0.65); }
+.balance-num { font-family: 'Fraunces', serif; font-size: 2.4rem; font-weight: 600; }
+.balance-acct { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--gold); }
+
+/* ---------- Flash toast ---------- */
+
+.flash {
+  position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 12px);
+  background: var(--cover); color: var(--paper);
+  border-left: 3px solid var(--gold);
+  padding: 12px 18px; border-radius: var(--radius);
+  font-size: 0.88rem; opacity: 0; transition: all 0.25s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  max-width: 90vw;
+}
+.flash.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 520px) {
+  .balance-num { font-size: 1.9rem; }
+  .collect-row { flex-wrap: wrap; }
+  .collect-row input { width: 100%; }
+}
