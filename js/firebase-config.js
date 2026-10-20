@@ -3,7 +3,7 @@
 // Get these from: Firebase Console → Project Settings → General
 // → "Your apps" → Web app → SDK setup and configuration
 // ============================================================
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyDhxMVDr54Xla7xDUh47xvf5_12rNf2Q-o",
   authDomain: "susu-f485e.firebaseapp.com",
   projectId: "susu-f485e",
