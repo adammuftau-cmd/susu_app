@@ -382,15 +382,24 @@ db.watchAuth(async user => {
     renderLogin();
     return;
   }
-  currentProfile = await db.getUserProfile(user.uid);
+  try {
+    currentProfile = await db.getUserProfile(user.uid);
+  } catch (err) {
+    console.error(err);
+    topbar.innerHTML = "";
+    view.innerHTML = `
+      <section class="auth-card">
+        <h1>Couldn't load your account</h1>
+        <p class="sub">${err.code || err.message}</p>
+        <p class="sub">Check that your Firestore rules are published and your profile exists.</p>
+        <button class="btn-primary" id="retrySignOut">Sign out</button>
+      </section>`;
+    document.getElementById("retrySignOut").addEventListener("click", () => db.logOut());
+    return;
+  }
   if (!currentProfile) { renderLogin(); return; }
   if (currentProfile.role === "admin") renderAdmin();
   else if (currentProfile.role === "collector") renderCollector();
   else renderCustomer();
 });
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-  });
 }
