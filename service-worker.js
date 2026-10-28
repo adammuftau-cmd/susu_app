@@ -1,4 +1,4 @@
-const CACHE = "ledger-v1";
+const CACHE = "ledger-v3";
 const SHELL = [
   "./",
   "./index.html",
@@ -23,13 +23,18 @@ self.addEventListener("activate", e => {
   self.clients.claim();
 });
 
-// Network-first for Firebase calls (live data), cache-first for the app shell.
+// Network-first for the app's own files (so new deploys show up immediately),
+// falling back to the cache when offline. Firebase API calls go straight to the network.
 self.addEventListener("fetch", e => {
   const url = e.request.url;
-  if (url.includes("firestore") || url.includes("googleapis") || url.includes("identitytoolkit")) {
-    return; // let these go straight to the network
-  }
+  if (e.request.method !== "GET" || !url.startsWith(self.location.origin)) return;
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request).catch(() => cached))
+    fetch(e.request)
+      .then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });

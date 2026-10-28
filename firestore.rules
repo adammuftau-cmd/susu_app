@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function hasProfile() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isAdmin() {
+      return hasProfile() && profile().role == "admin";
+    }
+    function isCollector() {
+      return hasProfile() && profile().role == "collector";
+    }
+    function myCollectorRef() {
+      return profile().collectorRef;
+    }
+    function myCustomerRef() {
+      return profile().customerRef;
+    }
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // An invited person may link their new login to the record the admin created,
+    // but only if the record is unclaimed and the email matches theirs.
+    function claimsOwnRecord() {
+      return isSignedIn()
+        && resource.data.uid == null
+        && request.resource.data.uid == request.auth.uid
+        && resource.data.email.lower() == myEmail()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["uid"]);
+    }
+
+    // ---------- users ----------
+    // Read your own profile (admin reads all). A profile can only be created in one
+    // of three legitimate ways, and never edited by clients afterwards.
+    match /users/{uid} {
+      allow read: if request.auth.uid == uid || isAdmin();
+
+      allow create: if isSignedIn() && request.auth.uid == uid && (
+        // 1. the very first admin (config/admin must not exist yet and is created in the same batch)
+        (request.resource.data.role == "admin"
+          && !exists(/databases/$(database)/documents/config/admin)
+          && existsAfter(/databases/$(database)/documents/config/admin)
+          && getAfter(/databases/$(database)/documents/config/admin).data.uid == request.auth.uid)
+        // 2. an invited collector, claiming an unclaimed record in the same batch
+        || (request.resource.data.role == "collector"
+          && get(/databases/$(database)/documents/collectors/$(request.resource.data.collectorRef)).data.uid == null
+          && getAfter(/databases/$(database)/documents/collectors/$(request.resource.data.collectorRef)).data.uid == request.auth.uid)
+        // 3. a customer: either self-registered (own id) or an invited record claimed in the same batch
+        || (request.resource.data.role == "customer"
+          && (request.resource.data.customerRef == request.auth.uid
+            || (get(/databases/$(database)/documents/customers/$(request.resource.data.customerRef)).data.uid == null
+              && getAfter(/databases/$(database)/documents/customers/$(request.resource.data.customerRef)).data.uid == request.auth.uid)))
+      );
+
+      allow update, delete: if false;
+    }
+
+    // ---------- config (marks that the first admin exists) ----------
+    match /config/{docId} {
+      allow get: if isSignedIn();
+      allow create: if isSignedIn() && docId == "admin"
+        && !exists(/databases/$(database)/documents/config/admin)
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ---------- invites (keyed by the invited person's lowercase email) ----------
+    match /invites/{inviteEmail} {
+      allow get, delete: if (isSignedIn() && myEmail() == inviteEmail) || isAdmin();
+      allow list, create, update: if isAdmin();
+    }
+
+    // ---------- collectors ----------
+    match /collectors/{id} {
+      allow read: if isAdmin() || (isCollector() && myCollectorRef() == id);
+      allow create: if isAdmin();
+      allow update: if isAdmin() || claimsOwnRecord();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- customers ----------
+    match /customers/{id} {
+      allow read: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        (hasProfile() && myCustomerRef() == id);
+      allow create: if isAdmin() ||
+        (isSignedIn() && id == request.auth.uid
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.balance == 0
+          && request.resource.data.collectorId == null);
+      allow update: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        claimsOwnRecord();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- collections (daily deposits) ----------
+    match /collections/{id} {
+      allow read: if isAdmin() ||
+        (isCollector() && resource.data.collectorId == myCollectorRef()) ||
+        (hasProfile() && resource.data.customerId == myCustomerRef());
+      allow create: if isAdmin() ||
+        (isCollector() && request.resource.data.collectorId == myCollectorRef());
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- withdrawals ----------
+    match /withdrawals/{id} {
+      allow read: if isAdmin() || (hasProfile() && resource.data.customerId == myCustomerRef());
+      allow create: if hasProfile()
+        && request.resource.data.customerId == myCustomerRef()
+        && request.resource.data.status == "pending";
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+  }
+}

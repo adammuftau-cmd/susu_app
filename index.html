@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledger — Daily Savings</title>
+<meta name="description" content="Daily susu savings collection, receipts, and withdrawals.">
+<meta name="theme-color" content="#0F2E24">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div id="topbar"></div>
+  <main id="view"><section class="auth-card"><div class="ledger-mark">Ledger</div><p class="sub" id="bootMsg">Loading…</p></section></main>
+  <script>
+    // If the app fails to start (blocked Firebase CDN, bad config, old cached files), say so instead of staying blank.
+    function bootError(msg) {
+      var el = document.getElementById("bootMsg");
+      if (el) { el.style.color = "#8B3A3A"; el.textContent = "Could not start the app: " + msg; }
+    }
+    window.addEventListener("error", function (e) { bootError(e.message || "script error"); });
+    window.addEventListener("unhandledrejection", function (e) { bootError((e.reason && e.reason.message) || "unknown error"); });
+    setTimeout(function () {
+      var el = document.getElementById("bootMsg");
+      if (el) bootError("it is taking too long. Check your internet connection and that js/firebase-config.js has your real Firebase values.");
+    }, 8000);
+  </script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
