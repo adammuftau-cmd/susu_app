@@ -4,7 +4,7 @@
 // → "Your apps" → Web app → SDK setup and configuration
 // ============================================================
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyDhxMVDr54Xla7xDUh47xvf5_12rNf2Q-o",
   authDomain: "susu-f485e.firebaseapp.com",
   databaseURL: "https://susu-f485e-default-rtdb.firebaseio.com",
